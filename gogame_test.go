@@ -20,13 +20,13 @@ func TestNewStandardGame(t *testing.T) {
 	if len(g.board) != 19*19 {
 		t.Fail()
 	}
-	if g.pointIdxMap == nil {
+	if g.pointIdxPlus1Map == nil {
 		t.Fail()
 	}
-	if g.pointIdxMap["C4"] != 42 {
+	if g.pointIdxPlus1Map["C4"] != 42 {
 		t.Fail()
 	}
-	if g.pointIdxMap["I9"] != 0 {
+	if g.pointIdxPlus1Map["I9"] != 0 {
 		t.Fail()
 	}
 }
@@ -46,12 +46,13 @@ func ExampleMoves() {
 	g := Standard(5, 5)
 	g.Move(Black, "D3")
 	g.Move(White, "C3")
+	g.Move(Black, "D2")
 	fmt.Println("\n", g)
 	// Output:
 	// · · · · ·
 	// · · · · ·
 	// · · ○ ● ·
-	// · · · · ·
+	// · · · ● ·
 	// · · · · ·
 }
 

@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-
-	"github.com/twmb/algoimpl/go/graph"
 )
 
 type pointState uint8
@@ -16,47 +14,77 @@ const (
 	White
 )
 
+func nameForPointState(s pointState) string {
+	switch s {
+	case unset:
+		return "unset"
+	case Black:
+		return "Black"
+	case White:
+		return "White"
+	}
+	return ""
+}
+
 type move struct {
 	stone    pointState
 	pointIdx int
 }
 
-type game struct {
-	history     []move
-	board       []graph.Node
-	position    []pointState
-	pointIdxMap map[string]int
-	formatter   func() string
+type point struct {
+	index  int
+	adjpts []*point
 }
 
-func makeStandardPointIdxMap(width, height int) map[string]int {
-	m := make(map[string]int)
+type game struct {
+	history          []move
+	board            []point
+	position         []pointState
+	lastPosition     []pointState
+	pointIdxPlus1Map map[string]int
+	formatter        func() string
+}
+
+func linkPoints(p1, p2 *point) {
+	p1.adjpts = append(p1.adjpts, p2)
+	p2.adjpts = append(p2.adjpts, p1)
+}
+
+func Standard(width, height int) *game {
+	g := game{
+		board:            make([]point, width*height),
+		position:         make([]pointState, width*height),
+		pointIdxPlus1Map: make(map[string]int),
+	}
+
 	for i := 0; i < width; i++ {
 		for j := 0; j < height; j++ {
-			idx := i*height + j + 1
 			var name string
 			if i < 8 {
 				name = fmt.Sprintf("%c%d", []rune("A")[0]+rune(i), j+1)
 			} else {
 				name = fmt.Sprintf("%c%d", []rune("A")[0]+rune(i+1), j+1)
 			}
-			m[name] = idx
+
+			idx := i*height + j
+
+			if i > 0 {
+				linkPoints(&g.board[idx], &g.board[idx-height])
+			}
+			if j > 0 {
+				linkPoints(&g.board[idx], &g.board[idx-1])
+			}
+
+			g.board[idx].index = idx
+			g.pointIdxPlus1Map[name] = idx + 1
 		}
 	}
-	return m
-}
 
-func Standard(width, height int) *game {
-	g := game{
-		board:       make([]graph.Node, width*height),
-		position:    make([]pointState, width*height),
-		pointIdxMap: makeStandardPointIdxMap(width, height),
-	}
 	g.formatter = func() string {
 		var buffer bytes.Buffer
 		for j := height - 1; j >= 0; j-- {
 			for i := 0; i < width; i++ {
-				if i != 0 {
+				if i > 0 {
 					buffer.WriteByte(' ')
 				}
 				idx := i*height + j
@@ -77,11 +105,18 @@ func Standard(width, height int) *game {
 }
 
 func (g *game) Move(stone pointState, pointName string) error {
-	idx := g.pointIdxMap[pointName] - 1
-	if g.position[idx] != unset {
-		return errors.New("Black cannot move to D3: space is occupied")
+	g.history = append(g.history, move{stone: stone, pointIdx: g.pointIdxPlus1Map[pointName] - 1})
+
+	idx := g.pointIdxPlus1Map[pointName] - 1
+	curPtState := g.position[idx]
+	if curPtState != unset {
+		return errors.New(fmt.Sprintf("%s cannot move to %s: space is occupied", nameForPointState(curPtState), pointName))
 	}
-	g.position[idx] = stone
+	newPosition := make([]pointState, len(g.position))
+	copy(newPosition, g.position)
+	newPosition[idx] = stone
+	g.lastPosition = g.position
+	g.position = newPosition
 	return nil
 }
 
