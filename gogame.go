@@ -36,11 +36,13 @@ type point struct {
 	adjpts []*point
 }
 
+type position []pointState
+
 type game struct {
 	history          []move
 	board            []point
-	position         []pointState
-	lastPosition     []pointState
+	position         position
+	lastPosition     position
 	pointIdxPlus1Map map[string]int
 	formatter        func() string
 }
@@ -115,6 +117,8 @@ func (g *game) Move(stone pointState, pointName string) error {
 	newPosition := make([]pointState, len(g.position))
 	copy(newPosition, g.position)
 	newPosition[idx] = stone
+	for _, adjpt := range g.board[idx].adjpts {
+	}
 	g.lastPosition = g.position
 	g.position = newPosition
 	return nil
