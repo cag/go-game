@@ -96,6 +96,25 @@ func ExampleMultipleCapture() {
 	// · · ○ · ·
 }
 
+func ExampleCaptureDeadChain() {
+	g := Standard(5, 5)
+	g.Move(White, "A2")
+	g.Move(White, "B2")
+	g.Move(White, "B1")
+	g.Move(Black, "A3")
+	g.Move(Black, "B3")
+	g.Move(Black, "C2")
+	g.Move(Black, "C1")
+	g.Move(Black, "A1")
+	fmt.Println("\n", g)
+	// Output:
+	// · · · · ·
+	// · · · · ·
+	// ● ● · · ·
+	// · · ● · ·
+	// ● · ● · ·
+}
+
 func ExampleSuicideRule() {
 	g := Standard(5, 5)
 	g.Move(Black, "D3")
