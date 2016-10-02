@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 type pointState uint8
@@ -36,13 +37,11 @@ type point struct {
 	adjpts []*point
 }
 
-type position []pointState
-
 type game struct {
 	history          []move
 	board            []point
-	position         position
-	lastPosition     position
+	position         []pointState
+	lastPosition     []pointState
 	pointIdxPlus1Map map[string]int
 	formatter        func() string
 }
@@ -50,6 +49,45 @@ type game struct {
 func linkPoints(p1, p2 *point) {
 	p1.adjpts = append(p1.adjpts, p2)
 	p2.adjpts = append(p2.adjpts, p1)
+}
+
+func (p *point) chainSurrounded(position []pointState) bool {
+	visited := make([]bool, len(position))
+	var traveler func(p2 *point) bool
+	traveler = func(p2 *point) bool {
+		visited[p2.index] = true
+		curPtState := position[p2.index]
+		for _, adjpt := range p2.adjpts {
+			adjptState := position[adjpt.index]
+			if adjptState == unset {
+				return false
+			}
+			if adjptState == curPtState && !visited[adjpt.index] {
+				if !traveler(adjpt) {
+					return false
+				}
+			}
+		}
+		return true
+	}
+	return traveler(p)
+}
+
+func (p *point) removeChain(position []pointState) {
+	stone := position[p.index]
+	if stone == unset {
+		panic(fmt.Sprintf("Can't remove unset point %v from position %v", p, position))
+	}
+	var traveler func(p2 *point)
+	traveler = func(p2 *point) {
+		position[p2.index] = unset
+		for _, adjpt := range p2.adjpts {
+			if position[adjpt.index] == stone {
+				traveler(adjpt)
+			}
+		}
+	}
+	traveler(p)
 }
 
 func Standard(width, height int) *game {
@@ -112,12 +150,22 @@ func (g *game) Move(stone pointState, pointName string) error {
 	idx := g.pointIdxPlus1Map[pointName] - 1
 	curPtState := g.position[idx]
 	if curPtState != unset {
-		return errors.New(fmt.Sprintf("%s cannot move to %s: space is occupied", nameForPointState(curPtState), pointName))
+		return errors.New(fmt.Sprintf("%s cannot move to %s: space is occupied", nameForPointState(stone), pointName))
 	}
 	newPosition := make([]pointState, len(g.position))
 	copy(newPosition, g.position)
 	newPosition[idx] = stone
 	for _, adjpt := range g.board[idx].adjpts {
+		adjptState := newPosition[adjpt.index]
+		if adjptState != unset && adjptState != stone && adjpt.chainSurrounded(newPosition) {
+			adjpt.removeChain(newPosition)
+		}
+	}
+	if g.board[idx].chainSurrounded(newPosition) {
+		return errors.New(fmt.Sprintf("%s cannot move to %s: suicide rule", nameForPointState(stone), pointName))
+	}
+	if reflect.DeepEqual(g.lastPosition, newPosition) {
+		return errors.New(fmt.Sprintf("%s cannot move to %s: ko rule", nameForPointState(stone), pointName))
 	}
 	g.lastPosition = g.position
 	g.position = newPosition

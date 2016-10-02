@@ -79,45 +79,45 @@ func ExampleSingleCapture() {
 	// · · · · ·
 }
 
-// func ExampleSuicideRule() {
-// 	g := Standard(5, 5)
-// 	g.Move(Black, "D3")
-// 	g.Move(Black, "C4")
-// 	g.Move(Black, "B3")
-// 	g.Move(Black, "C2")
-// 	fmt.Println(g.Move(White, "C3"))
-// 	// Output: White cannot move to C3: suicide rule
-// }
+func ExampleSuicideRule() {
+	g := Standard(5, 5)
+	g.Move(Black, "D3")
+	g.Move(Black, "C4")
+	g.Move(Black, "B3")
+	g.Move(Black, "C2")
+	fmt.Println(g.Move(White, "C3"))
+	// Output: White cannot move to C3: suicide rule
+}
 
-// func ExampleNearSuicideCapture() {
-// 	g := Standard(5, 5)
-// 	g.Move(Black, "D3")
-// 	g.Move(Black, "C4")
-// 	g.Move(Black, "B3")
-// 	g.Move(Black, "C2")
-// 	g.Move(White, "B4")
-// 	g.Move(White, "A3")
-// 	g.Move(White, "B2")
-// 	g.Move(White, "C3")
-// 	fmt.Println("\n", g)
-// 	// Output:
-// 	// · · · · ·
-// 	// · ○ ● · ·
-// 	// ○ · ○ ● ·
-// 	// · ○ ● · ·
-// 	// · · · · ·
-// }
+func ExampleNearSuicideCapture() {
+	g := Standard(5, 5)
+	g.Move(Black, "D3")
+	g.Move(Black, "C4")
+	g.Move(Black, "B3")
+	g.Move(Black, "C2")
+	g.Move(White, "B4")
+	g.Move(White, "A3")
+	g.Move(White, "B2")
+	g.Move(White, "C3")
+	fmt.Println("\n", g)
+	// Output:
+	// · · · · ·
+	// · ○ ● · ·
+	// ○ · ○ ● ·
+	// · ○ ● · ·
+	// · · · · ·
+}
 
-// func ExampleKoRule() {
-// 	g := Standard(5, 5)
-// 	g.Move(Black, "D3")
-// 	g.Move(Black, "C4")
-// 	g.Move(Black, "B3")
-// 	g.Move(Black, "C2")
-// 	g.Move(White, "B4")
-// 	g.Move(White, "A3")
-// 	g.Move(White, "B2")
-// 	g.Move(White, "C3")
-// 	fmt.Println(g.Move(Black, "B3"))
-// 	// Output: Black cannot move to B3: ko rule
-// }
+func ExampleKoRule() {
+	g := Standard(5, 5)
+	g.Move(Black, "D3")
+	g.Move(Black, "C4")
+	g.Move(Black, "B3")
+	g.Move(Black, "C2")
+	g.Move(White, "B4")
+	g.Move(White, "A3")
+	g.Move(White, "B2")
+	g.Move(White, "C3")
+	fmt.Println(g.Move(Black, "B3"))
+	// Output: Black cannot move to B3: ko rule
+}
