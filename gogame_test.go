@@ -79,6 +79,23 @@ func ExampleSingleCapture() {
 	// · · · · ·
 }
 
+func ExampleMultipleCapture() {
+	g := Standard(5, 5)
+	g.Move(Black, "A1")
+	g.Move(Black, "B1")
+	g.Move(Black, "A2")
+	g.Move(White, "C1")
+	g.Move(White, "B2")
+	g.Move(White, "A3")
+	fmt.Println("\n", g)
+	// Output:
+	// · · · · ·
+	// · · · · ·
+	// ○ · · · ·
+	// · ○ · · ·
+	// · · ○ · ·
+}
+
 func ExampleSuicideRule() {
 	g := Standard(5, 5)
 	g.Move(Black, "D3")
